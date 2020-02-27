@@ -11,6 +11,9 @@ USTH ICT 2020 Distributed Systems
 Group Info
 =======================
 
-* Name 1 (ID1)
-* Name 2 (ID2)
+* Nguyễn Đức Anh (BI9-041)
+* Đoàn Minh Long (BI9-145)
+* Trần Khánh Dương (Bi9-078)
+* Vũ Long Dũng (BI9-070)
+* Trần Ngọc Diệp (BI7-033)
 
