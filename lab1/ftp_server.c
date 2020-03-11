@@ -5,9 +5,11 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <fcntl.h>
- #include <unistd.h>
-int ftp(int sockfd, char* filename, char type);
-int main() {
+#include <unistd.h>
+#include <sys/stat.h>
+int ftp(int sockfd, char *filename, char type);
+int main()
+{
     int ss, cli, pid;
     struct sockaddr_in ad;
     char s[100];
@@ -26,74 +28,83 @@ int main() {
     // then listen
     listen(ss, 0);
 
-    while (1) {
+    while (1)
+    {
         // an incoming connection
         cli = accept(ss, (struct sockaddr *)&ad, &ad_length);
 
         pid = fork();
-        if (pid == 0) {
+        if (pid == 0)
+        {
             // I'm the son, I'll serve this client
             printf("client connected\n");
-            while (1) {
+            while (1)
+            {
                 // it's client turn to chat, I wait and read message from client
                 read(cli, s, sizeof(s));
-                printf("client says: %s\n",s);
-		
-		if (strncmp(s, "ftp ", 4) == 0) {
-			char file[100];
-			strncpy(file, s+7,100);
-			printf(file);
-			ftp(cli, file, s[5]);
-			continue;
-		} 
-                 // now it's my (server) turn
-                 printf("server>", s);
-                 scanf("%s", s);
-                 write(cli, s, strlen(s) + 1);
+                printf("client says: %s\n", s);
+
+                if (strncmp(s, "ftp ", 4) == 0)
+                {
+                    char file[100];
+                    strncpy(file, s + 7, 100);
+                    printf(file);
+                    ftp(cli, file, s[5]);
+                    continue;
+                }
+                // now it's my (server) turn
+                printf("server>", s);
+                scanf("%s", s);
+                write(cli, s, strlen(s) + 1);
             }
             return 0;
         }
-        else {
+        else
+        {
             // I'm the father, continue the loop to accept more clients
             continue;
         }
     }
     // disconnect
     close(cli);
-
 }
 
-int ftp(int sockfd, char* filename, char type) {
-	char buff[100];
-	int fd;
-	
-	*(rindex(filename, '\n')) = '\0'; // remove newline char in filepath
-	
-	// client download file
-	if (type == 'r') {
-		printf("Starting transfer file: %s\n", filename);
-		fd = open(filename, O_RDONLY);
-		while(read(fd, buff, 100)) {
-			write(sockfd, buff, 100);
-			memset(buff, 0, 100);
-		}
-		write(sockfd, "\0", 1);
-		close(fd);
-		printf("Transfer complete\n");
-		return 1;
-	}
-	// client upload file 
-	if (type == 's') {
-		printf("Starting receive file: %s\n", filename);
-		fd = creat(filename, S_IRWXG);
-		read(sockfd, buff, 100);
-		while(buff[0] != '\0') {
-			write(fd, buff, 100);
-			read(sockfd, buff, 100);
-		}
-		write(fd, '\0', 1);
-		close(fd);
-		printf("Success");
-		return 1;
-	}
+int ftp(int sockfd, char *filename, char type)
+{
+    char buff[100];
+    int fd;
+
+    *(rindex(filename, '\n')) = '\0'; // remove newline char in filepath
+
+    // client download file
+    if (type == 'r')
+    {
+        printf("Starting transfer file: %s\n", filename);
+        fd = open(filename, O_RDONLY);
+        while (read(fd, buff, 100))
+        {
+            write(sockfd, buff, 100);
+            memset(buff, 0, 100);
+        }
+        write(sockfd, "\0", 1);
+        close(fd);
+        printf("Transfer complete\n");
+        return 1;
+    }
+    // client upload file
+    if (type == 's')
+    {
+        printf("Starting receive file: %s\n", filename);
+        fd = creat(filename, S_IRWXG);
+        read(sockfd, buff, 100);
+        while (buff[0] != '\0')
+        {
+            write(fd, buff, 100);
+            read(sockfd, buff, 100);
+        }
+        write(fd, '\0', 1);
+        close(fd);
+        printf("Success");
+        return 1;
+    }
 }
