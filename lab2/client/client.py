@@ -4,9 +4,7 @@ import xmlrpc.client
 import sys
 import os
 
-
-##########################PARSING ARGUMENTS################################
-
+############################################PARSING ARGUMENTS##############################################
 parser = argparse.ArgumentParser(description="Python RPC client")
 subparsers = parser.add_subparsers(required= True, help='subcommands', dest='subparsers')
 
@@ -22,7 +20,7 @@ parser_b.add_argument('-a', type=str, required= True, help='local file content t
 
 # create the parser for the "setCreationTime" command
 parser_c = subparsers.add_parser('setCreationTime', help='add creation time to file')
-parser_c.add_argument('-t', type = str, help='add creation time manually')
+parser_c.add_argument('-manual', type = str, help='add creation time manually')
 parser_c.add_argument('-auto', type = str, help="let's the server get time")
 
 # Print help if no commands are provided
@@ -32,12 +30,15 @@ if len(sys.argv)==1:
 
 # parsing arguments
 args = parser.parse_args()
-print()
-if not any(newargs.values()):
-    parser.error('No arguments provided.')
 
+# If command is setCreationTime without arguments or more than the required argument, show error
+if (args.subparsers == 'setCreationTime'):
+    if (args.manual is None and args.auto is None):
+        parser.error('No argument requested, add -manual or -auto')
+    elif ((args.manual != None) and (args.auto != None)):
+        parser.error('setCreationTime only supports one argument.')
 
-###########################################################################
+############################################################################################################
 '''
 with xmlrpc.client.ServerProxy("http://localhost:12345/") as server:
     #upload files
