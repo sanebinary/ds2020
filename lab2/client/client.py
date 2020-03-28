@@ -24,6 +24,9 @@ parser_c.add_argument('-file', required = True, type = str, help="filename to se
 parser_c.add_argument('-manual', type = str, help='add creation time manually')
 parser_c.add_argument('-auto', help="let's the server get time", action='store_true')
 
+parser_d = subparsers.add_parser('upload', help='upload file to server')
+parser_d.add_argument('-f', help='filename')
+
 # Print help if no commands are provided
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
@@ -48,7 +51,7 @@ def bytes_from_file(filename, chunksize=1048576):
         while True:
             chunk = f.read(chunksize)
             if chunk:
-                yield from data
+                yield from chunk
             else:
                 break
 
@@ -60,8 +63,11 @@ with xmlrpc.client.ServerProxy("http://localhost:12345/") as server:
 
     #appendContent from local file to server
     elif (args.subparsers == 'appendContent'):
-        for data in bytes_from_file(args.src):
-            print(server.appendContent(args.dest,data))
+        with open(args.src, "rb") as f:
+            data = f.read(1024*1024)
+            while data:
+                print(server.appendContent(args.dest,data))
+                data = f.read(1024*1024)
 
     #setCreationTime:
     elif (args.subparsers == 'setCreationTime'):
@@ -71,6 +77,13 @@ with xmlrpc.client.ServerProxy("http://localhost:12345/") as server:
             timestampStr = datetime.now().strftime("%d-%b-%Y (%H:%M:%S.%f)")
             print(server.setCreationTime(args.file, timestampStr))
 
-    elif (args.subparsers == '')
-    #download from server
-#    exit(1)
+    #upload:
+    elif (args.subparsers == 'upload'):
+        filepath = os.path.join(os.getcwd(),args.f)
+        if (os.path.exists(filepath)):
+            with open(args.f, "rb") as f:
+                data = xmlrpc.client.Binary(f.read())
+                server.upload(args.f, data)
+        else:
+            print('The file ' + filepath + ' does not exist')
+
