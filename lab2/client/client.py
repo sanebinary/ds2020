@@ -47,17 +47,6 @@ if (args.subparsers == 'setCreationTime'):
 
 ############################################################################################################
 
-#Read 1mb of data each time
-#1 MB = 1024KB and 1 KB = 1024B so 1 MB has 1024 x 1024 = 1,048,576 bytes. That's 1,048,576 characters
-def bytes_from_file(filename, chunksize=1048576):
-    with open(filename, "r") as f:
-        while True:
-            chunk = f.read(chunksize)
-            if chunk:
-                yield from chunk
-            else:
-                break
-
 with xmlrpc.client.ServerProxy("http://localhost:12345/") as server:
     #setFileName
     if (args.subparsers == 'setFileName'):
@@ -65,6 +54,7 @@ with xmlrpc.client.ServerProxy("http://localhost:12345/") as server:
         exit(1)
 
     #appendContent from local file to server
+    #1 MB = 1024KB and 1 KB = 1024B so 1 MB has 1024 x 1024 = 1,048,576 bytes.
     elif (args.subparsers == 'appendContent'):
         with open(args.src, "rb") as f:
             data = f.read(1024*1024)
