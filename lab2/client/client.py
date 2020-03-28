@@ -25,7 +25,10 @@ parser_c.add_argument('-manual', type = str, help='add creation time manually')
 parser_c.add_argument('-auto', help="let's the server get time", action='store_true')
 
 parser_d = subparsers.add_parser('upload', help='upload file to server')
-parser_d.add_argument('-f', help='filename')
+parser_d.add_argument('-f', required= True, type=str, metavar='filename', help='filename')
+
+parser_e = subparsers.add_parser('download', help='download file from server')
+parser_e.add_argument('-f', required= True, type=str, metavar='filename', help='filename')
 
 # Print help if no commands are provided
 if len(sys.argv)==1:
@@ -81,9 +84,14 @@ with xmlrpc.client.ServerProxy("http://localhost:12345/") as server:
     elif (args.subparsers == 'upload'):
         filepath = os.path.join(os.getcwd(),args.f)
         if (os.path.exists(filepath)):
-            with open(args.f, "rb") as f:
+            with open(filepath, "rb") as f:
                 data = xmlrpc.client.Binary(f.read())
                 server.upload(args.f, data)
         else:
             print('The file ' + filepath + ' does not exist')
 
+    #download
+    elif (args.subparsers == 'download'):
+        with open(args.f, "wb") as f:
+            data = server.download(args.f).data
+            f.write(data)

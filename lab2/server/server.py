@@ -1,4 +1,5 @@
 from xmlrpc.server import SimpleXMLRPCServer
+import xmlrpc.client
 import sys
 import os
 import socket
@@ -37,6 +38,10 @@ def upload(filename, arg):
     with open(filename,"wb") as f:
         f.write(arg.data)
 
+def download(filename):
+    with open(filename, "rb") as f:
+        return xmlrpc.client.Binary(f.read())
+
 
 with SimpleXMLRPCServer(("localhost", 12345), logRequests=False, allow_none=True) as server:
     #upload files
@@ -45,6 +50,7 @@ with SimpleXMLRPCServer(("localhost", 12345), logRequests=False, allow_none=True
     server.register_function(appendContent, "appendContent")
     server.register_function(setCreationTime, "setCreationTime")
     server.register_function(upload, "upload")
+    server.register_function(download, "download")
 
     try:
         server.serve_forever()
